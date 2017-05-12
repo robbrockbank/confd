@@ -23,9 +23,9 @@ import:
   vcs: git
   version: 092eda23b5d2ccf95fe7dfc70354493eb273487a
   repo: https://github.com/Sirupsen/logrus/
-- package: github.com/coreos/go-etcd
-  version: 73a8ef737e8ea002281a28b4cb92a1de121ad4c6
-  repo: https://github.com/coreos/go-etcd/
+- package: github.com/coreos/etcd
+  version: v3.1.7
+  repo: https://github.com/coreos/etcd/
   subpackages:
   - etcd
 - package: github.com/garyburd/redigo

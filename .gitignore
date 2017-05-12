@@ -2,3 +2,4 @@ bin/
 pkg/
 .idea/
 vendor
+.go-pkg-cache
