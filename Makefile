@@ -43,11 +43,24 @@ vendor vendor/.up-to-date: glide.lock
 	$(DOCKER_GO_BUILD) glide install --strip-vendor
 	touch vendor/.up-to-date
 
+bin/confd.static: $(GO_FILES) vendor/.up-to-date
+	@echo Building confd...
+	mkdir -p bin
+	$(DOCKER_GO_BUILD) \
+	    sh -c 'go build -v -i -o $@ "github.com/kelseyhightower/confd" && \
+               ( ldd bin/confd.static 2>&1 | grep -q "Not a valid dynamic program" || \
+	             ( echo "Error: bin/confd.static was not statically linked"; false ) )'
+
 bin/confd: $(GO_FILES) vendor/.up-to-date
 	@echo Building confd...
 	mkdir -p bin
 	$(DOCKER_GO_BUILD) \
-	    sh -c 'go build -v -i -o $@ -v $(LDFLAGS) "github.com/kelseyhightower/confd" && \
-               ( ldd bin/confd 2>&1 | grep -q "Not a valid dynamic program" || \
-	             ( echo "Error: bin/confd was not statically linked"; false ) )'
+	    sh -c 'go build -v -o $@ "github.com/kelseyhightower/confd" && \
+	       ( ldd bin/confd 2>&1 | grep "Not a valid dynamic program" || \
+	             ( echo "Error: bin/confd was statically linked"; false ) )'
 
+release:
+	rm -rf bin
+	rm -rf vendor
+	$(MAKE) bin/confd.static
+	$(MAKE) bin/confd
