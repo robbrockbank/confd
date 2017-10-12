@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/kelseyhightower/confd/backends/calico"
 	"github.com/kelseyhightower/confd/backends/consul"
 	"github.com/kelseyhightower/confd/backends/dynamodb"
 	"github.com/kelseyhightower/confd/backends/env"
@@ -25,6 +26,12 @@ import (
 type StoreClient interface {
 	GetValues(keys []string) (map[string]string, error)
 	WatchPrefix(prefix string, keys []string, waitIndex uint64, stopChan chan bool) (uint64, error)
+}
+
+// The InitStoreClient interface is an optional interface that a client can implement to be told in advance
+// about the full set of prefixes it is listening to.
+type InitStoreClient interface {
+	SetPrefixes(keys []string)
 }
 
 // New is used to create a storage client based on our configuration.
@@ -84,6 +91,9 @@ func New(config Config) (StoreClient, error) {
 	case "k8s":
 		log.Info("Backend set to k8s")
 		return k8s.NewK8sClient(config.Kubeconfig)
+	case "calico":
+		log.Info("Backend set to calico")
+		return calico.NewCalicoClient(config.Calicoconfig)
 	}
 	return nil, errors.New("Invalid backend")
 }

@@ -17,4 +17,5 @@ type Config struct {
 	UserID       string
 	YAMLFile     string
 	Kubeconfig   string
+	Calicoconfig string
 }
