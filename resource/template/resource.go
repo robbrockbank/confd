@@ -48,6 +48,7 @@ type TemplateResource struct {
 	Src           string
 	StageFile     *os.File
 	Uid           int
+	PrefixedKeys  []string
 	funcMap       map[string]interface{}
 	lastIndex     uint64
 	keepStageFile bool
@@ -103,6 +104,9 @@ func NewTemplateResource(path string, config Config) (*TemplateResource, error) 
 	if tr.Gid == -1 {
 		tr.Gid = os.Getegid()
 	}
+
+	// Calculate the set of keys including the prefix.
+	tr.PrefixedKeys = appendPrefix(tr.Prefix, tr.Keys)
 
 	tr.Src = filepath.Join(config.TemplateDir, tr.Src)
 	return &tr, nil

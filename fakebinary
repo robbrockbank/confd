@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "Running fake binary bird/bird5 or allocate_ipip_addr"
