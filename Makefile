@@ -136,11 +136,11 @@ bin/kubectl:
 	chmod +x $@
 
 bin/bird:
-	cp fakebinary $@
+	curl -sSf -L --retry 5 https://github.com/projectcalico/bird/releases/download/$(BIRD_VER)/bird -o $@
 	chmod +x $@
 
 bin/bird6:
-	cp fakebinary $@
+	curl -sSf -L --retry 5 https://github.com/projectcalico/bird/releases/download/$(BIRD_VER)/bird6 -o $@
 	chmod +x $@
 
 bin/restart-calico-confd:

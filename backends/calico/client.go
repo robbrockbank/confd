@@ -37,8 +37,8 @@ func NewCalicoClient(configfile string) (*client, error) {
 		return nil, err
 	}
 
-	// Create the client.  Initialize the cache revision to 1 so that all of the watchers
-	// exit immediately to render their data.
+	// Create the client.  Initialize the cache revision to 1 so that the watcher
+	// code can handle the first iteration by always rendering.
 	c := &client{
 		client: bc,
 		cache: make(map[string]string),
@@ -59,8 +59,8 @@ func NewCalicoClient(configfile string) (*client, error) {
 }
 
 // client implements the StoreClient interface for confd, and also implements the
-// Calico api.SyncerCallbacks and api.SyncerParseFailCallbacks interfaces for use by
-// the BGP Syncer runs in the background.
+// Calico api.SyncerCallbacks and api.SyncerParseFailCallbacks interfaces for the
+// BGP Syncer.
 type client struct {
 	// The Calico backend client.
 	client api.Client
@@ -216,8 +216,12 @@ func (c *client) GetValues(keys []string) (map[string]string, error) {
 	return values, nil
 }
 
-// WatchPrefix waits for sync events and checks if any of the key prefixes we are interested in have
-// been modified.  Function returns when a key is modified.  We currently do not use the stopChan.
+// WatchPrefix returns when the snapshot for any of the supplied prefix keys is changed from the
+// last known waitIndex (revision).
+//
+// Since we keep track of revisions per prefix, all we need to do is check the revisions for an
+// update, and if there is no update wait on the conditional which will be woken by the OnUpdates
+// thread after updating the cache.
 func (c *client) WatchPrefix(prefix string, keys []string, waitIndex uint64, stopChan chan bool) (uint64, error) {
 	c.cacheLock.Lock()
 	defer c.cacheLock.Unlock()
