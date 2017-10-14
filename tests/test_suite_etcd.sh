@@ -1,6 +1,14 @@
 #!/bin/bash
 
-# We should ext=it if any command fails.
+# This script runs a set of tests to verify the Calico client implementation of
+# confd.
+#
+# Data is programmed using calicoctl.
+
+# Make sure confd is not running
+pkill -9 confd
+
+# We should exit if any command fails.
 set -e
 
 # Add our bins to the PATH
@@ -11,11 +19,7 @@ script_dir="$(dirname "$0")"
 source "$script_dir/test_suite_common.sh"
 
 # Set the log output directory and ensure the directory exists.
-export LOGPATH=/tests/logs/etcd/
-
-# This is needed for use in the keys of our templates, and the sed commands
-# in utils.sh use them to create the toml files.
-export NODENAME="kube-master"
+export LOGPATH=/tests/logs/etcd
 
 # We are using etcdv3.  Set the datastore parms for calicoctl/confd/etcdctl
 export ETCDCTL_API=3
@@ -41,3 +45,5 @@ execute_test_suite
 execute_test_suite
 
 echo "Test complete"
+
+set +e

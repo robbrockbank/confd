@@ -254,10 +254,10 @@ func (t *TemplateResource) check() error {
 	c := exec.Command("/bin/sh", "-c", cmdBuffer.String())
 	output, err := c.CombinedOutput()
 	if err != nil {
-		log.Error(fmt.Sprintf("%q", string(output)))
+		log.Error(fmt.Sprintf("Error from checkcmd: %q", string(output)))
 		return err
 	}
-	log.Debug(fmt.Sprintf("%q", string(output)))
+	log.Debug(fmt.Sprintf("Output from checkcmd: %q", string(output)))
 	return nil
 }
 
