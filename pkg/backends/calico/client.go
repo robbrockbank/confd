@@ -49,6 +49,10 @@ import (
 
 const globalLogging = "/calico/bgp/v1/global/loglevel"
 
+const (
+	DEBUGGING_CONFIGURATION_LOG_LEVEL = "CONFD_DEBUGGING_CONFIGURATION_LOG_LEVEL"
+)
+
 // Handle a few keys that we need to default if not specified.
 var globalDefaults = map[string]string{
 	"/calico/bgp/v1/global/as_num":    "64512",
@@ -61,6 +65,32 @@ type backendClientAccessor interface {
 	Backend() api.Client
 }
 
+func NewClient(confdConfig *config.Config) (clientv3.Interface, error) {
+	// Load the client clientCfg.  This loads from the environment if a filename
+	// has not been specified.
+	clientCfg, err := apiconfig.LoadClientConfig(confdConfig.CalicoConfig)
+	if err != nil {
+		log.Errorf("Failed to load Calico client configuration: %v", err)
+		return nil, err
+	}
+
+	cc, err := clientv3.New(*clientCfg)
+	if err != nil {
+		log.Errorf("Failed to create main Calico client: %v", err)
+		return nil, err
+	}
+	return cc, nil
+}
+
+// TriggerLogLevelSetting is just a wrapper around updateLogLevel
+func TriggerLogLevelSetting(cc interface{}) {
+	if c, ok := cc.(*client); ok {
+		c.updateLogLevel()
+	} else {
+		log.Warn("failed to get client.")
+	}
+}
+
 func NewCalicoClient(confdConfig *config.Config) (*client, error) {
 	// Load the client clientCfg.  This loads from the environment if a filename
 	// has not been specified.
@@ -70,15 +100,16 @@ func NewCalicoClient(confdConfig *config.Config) (*client, error) {
 		return nil, err
 	}
 
-	// Query the current BGP configuration to determine if the node to node mesh is enabled or
-	// not.  If it is we need to monitor all node configuration.  If it is not enabled then we
-	// only need to monitor our own node.  If this setting changes, we terminate confd (so that
-	// when restarted it will start watching the correct resources).
-	cc, err := clientv3.New(*clientCfg)
+	cc, err := NewClient(confdConfig)
 	if err != nil {
 		log.Errorf("Failed to create main Calico client: %v", err)
 		return nil, err
 	}
+
+	// Query the current BGP configuration to determine if the node to node mesh is enabled or
+	// not.  If it is we need to monitor all node configuration.  If it is not enabled then we
+	// only need to monitor our own node.  If this setting changes, we terminate confd (so that
+	// when restarted it will start watching the correct resources).
 	cfg, err := cc.BGPConfigurations().Get(
 		context.Background(),
 		"default",
@@ -1053,14 +1084,18 @@ func (c *client) keyUpdated(key string) {
 }
 
 func (c *client) updateLogLevel() {
-	if envLevel := os.Getenv("BGP_LOGSEVERITYSCREEN"); envLevel != "" {
-		logutils.SetLevel(envLevel)
-	} else if nodeLevel := c.cache[c.nodeLogKey]; nodeLevel != "" {
-		logutils.SetLevel(nodeLevel)
-	} else if globalLogLevel := c.cache[globalLogging]; globalLogLevel != "" {
-		logutils.SetLevel(globalLogLevel)
+	if dcls := os.Getenv(DEBUGGING_CONFIGURATION_LOG_LEVEL); dcls != "" {
+		logutils.SetLevel("debug")
 	} else {
-		logutils.SetLevel("info")
+		if envLevel := os.Getenv("BGP_LOGSEVERITYSCREEN"); envLevel != "" {
+			logutils.SetLevel(envLevel)
+		} else if nodeLevel := c.cache[c.nodeLogKey]; nodeLevel != "" {
+			logutils.SetLevel(nodeLevel)
+		} else if globalLogLevel := c.cache[globalLogging]; globalLogLevel != "" {
+			logutils.SetLevel(globalLogLevel)
+		} else {
+			logutils.SetLevel("info")
+		}
 	}
 }
 

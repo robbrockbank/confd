@@ -241,6 +241,7 @@ github.com/projectcalico/libcalico-go v1.7.2-0.20200605154551-89d66798ae9a h1:T7
 github.com/projectcalico/libcalico-go v1.7.2-0.20200605154551-89d66798ae9a/go.mod h1:P+KtlWYdi0TY2NpPWao6vUOSGle40VpuHnYn7T1WolQ=
 github.com/projectcalico/libcalico-go v1.7.2-0.20200608214448-871c78fe00ea h1:+wDFdl+7tuszjFLxArKanQEz81THubJ90fIlwaDnqWk=
 github.com/projectcalico/libcalico-go v1.7.2-0.20200608214448-871c78fe00ea/go.mod h1:P+KtlWYdi0TY2NpPWao6vUOSGle40VpuHnYn7T1WolQ=
+github.com/projectcalico/libcalico-go v1.7.3 h1:qcbxAhsq/5zqZqpHE24VqMHfmoBVdXZV0Kf82+5rbqU=
 github.com/projectcalico/logrus v1.0.4-calico h1:bHJ2KLGTFzoWpRISe13CO7HVxxrKunDjyUz/wFiBY8c=
 github.com/projectcalico/logrus v1.0.4-calico/go.mod h1:DfgrchabbtEO9wjOz5lVae+XRvjFKKWEA9GTMme6A8g=
 github.com/projectcalico/typha v0.0.0-20200428231740-c01bb349f7f0 h1:1FxYrQfYQYmvPYJXLKwyM/K6LGql2E+Hnd5U963CBGI=
